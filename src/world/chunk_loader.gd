@@ -48,4 +48,14 @@ static func build_chunk(chunk: Dictionary) -> Node3D:
 		mi.mesh = mesh
 		mi.material_override = _material(layer)
 		node.add_child(mi)
+		# Walkable layers get trimesh collision. Roads deliberately don't:
+		# ribbons float 5 cm above the terrain the player already stands on,
+		# and doubled surfaces make CharacterBody3D jitter.
+		if layer == "terrain" or layer == "buildings":
+			var body := StaticBody3D.new()
+			body.name = layer + "_col"
+			var shape := CollisionShape3D.new()
+			shape.shape = mesh.create_trimesh_shape()
+			body.add_child(shape)
+			mi.add_child(body)
 	return node

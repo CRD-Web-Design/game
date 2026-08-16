@@ -26,7 +26,6 @@ def build_town(
     feats: Features,
     height_fn: HeightFn,
     out_dir: Path,
-    terrain_all: bool = False,
 ) -> dict:
     """Generate all chunk meshes + manifest. Returns the manifest dict.
 
@@ -34,8 +33,8 @@ def build_town(
     - buildings by footprint centroid;
     - road *segments* by segment midpoint (a long road contributes geometry
       to every chunk it crosses, with at most one segment of slack);
-    - terrain for every chunk that received features (or all in-bounds
-      chunks with terrain_all=True).
+    - terrain for EVERY in-bounds chunk, so the walkable ground has no
+      holes regardless of where features landed (M1: player collision).
     """
     cs = cfg.chunk_size
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -59,11 +58,7 @@ def build_town(
 
     ni = int(math.ceil(frame.extent_x / cs))
     nj = int(math.ceil(frame.extent_y / cs))
-    if terrain_all:
-        active = {(i, j) for i in range(ni) for j in range(nj)}
-    else:
-        active = set(road_segs) | set(bld_in_chunk)
-    active = {(i, j) for (i, j) in active if 0 <= i < ni and 0 <= j < nj}
+    active = {(i, j) for i in range(ni) for j in range(nj)}
 
     chunks = []
     for (i, j) in sorted(active):
@@ -110,7 +105,14 @@ def build_town(
             layers["buildings"] = f"{cid}_buildings.obj"
             all_verts += bv
 
-        chunks.append({"id": cid, "i": i, "j": j, "layers": layers, "aabb": aabb(all_verts)})
+        chunks.append({
+            "id": cid, "i": i, "j": j,
+            "layers": layers,
+            "aabb": aabb(all_verts),
+            # For runtime heuristics (spawn point = densest chunk, etc.)
+            "n_buildings": len(blds),
+            "n_road_segments": len(segs),
+        })
 
     manifest = {
         "generator": f"mapgen {__version__}",

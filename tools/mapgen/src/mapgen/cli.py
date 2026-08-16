@@ -38,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--out", help="output dir (default: [export].out from config, "
                                  "resolved relative to the repo root)")
     b.add_argument("--terrain-all", action="store_true",
-                   help="emit terrain for every in-bounds chunk, not just populated ones")
+                   help="deprecated no-op: terrain now always covers every in-bounds chunk")
 
     args = ap.parse_args(argv)
     t0 = time.perf_counter()
@@ -67,8 +67,7 @@ def main(argv: list[str] | None = None) -> int:
         repo_root = Path(args.config).resolve().parents[2]
         out_dir = repo_root / cfg.out_dir
 
-    manifest = build_town(cfg, frame, feats, height_fn, out_dir,
-                          terrain_all=args.terrain_all)
+    manifest = build_town(cfg, frame, feats, height_fn, out_dir)
 
     dt = time.perf_counter() - t0
     c = manifest["counts"]

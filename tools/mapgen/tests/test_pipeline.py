@@ -38,8 +38,26 @@ class TestEndToEnd:
         assert m["version"] == 1
         assert m["counts"]["roads"] == 4
         assert m["counts"]["buildings"] == 12
-        assert m["counts"]["chunks"] >= 1
         assert m["chunk_size"] == 256.0
+
+    def test_terrain_covers_every_inbounds_chunk(self, out):
+        """No holes in the walkable ground (M1 collision requirement)."""
+        import math
+
+        m = json.loads((out / "manifest.json").read_text())
+        ni = math.ceil(m["extent_x"] / m["chunk_size"])
+        nj = math.ceil(m["extent_y"] / m["chunk_size"])
+        assert m["counts"]["chunks"] == ni * nj
+        assert all("terrain" in c["layers"] for c in m["chunks"])
+
+    def test_chunk_feature_counts_present(self, out):
+        m = json.loads((out / "manifest.json").read_text())
+        assert all("n_buildings" in c and "n_road_segments" in c for c in m["chunks"])
+        # The fixture town centre is the densest chunk — spawn heuristic target.
+        # (Shop row + town hall land in c_8_5, just south of the c_8_6 line.)
+        densest = max(m["chunks"], key=lambda c: c["n_buildings"])
+        assert densest["id"] == "c_8_5"
+        assert densest["n_buildings"] >= 4
 
     def test_frame_is_atherton_sized(self, out):
         m = json.loads((out / "manifest.json").read_text())

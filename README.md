@@ -43,18 +43,29 @@ The three reference dossiers are the load-bearing ones for anyone building the m
 
 ## Status
 
-**M0 in progress.** The PRD is drafted; the pipeline builds the bundled fixture end-to-end (23 tests green)
-and the Godot skeleton loads it. **The landmark and street registers were compiled from public web sources
-and need review by someone who knows the town** — see the accuracy caveats at the top of each register.
+**M1 in progress — first-person walking.** The pipeline builds real OSM data end-to-end (28 tests green);
+the Godot side streams chunks around a walking player with collision. **The landmark and street registers
+were compiled from public web sources and need review by someone who knows the town** — see the accuracy
+caveats at the top of each register.
 
 ## Run it
 
 ```sh
 pip install -e "tools/mapgen[dev]"
-mapgen build --config tools/mapgen/atherton.toml --fixture
+mapgen build --config tools/mapgen/atherton.toml --fixture   # or --pbf for real Atherton
 # open the repo in Godot 4.5+ (macOS, Apple Silicon) and press Play
-# RMB-drag look · WASD fly · E/Q up/down · Shift fast
 ```
+
+You spawn on foot in the densest chunk (with real data: the town centre).
+
+| Input | Action |
+|---|---|
+| Click | capture the mouse (Esc releases it) |
+| Mouse | look |
+| WASD | walk |
+| Shift | sprint |
+| Space | jump |
+| F | toggle noclip fly (E/Q for up/down, Shift for speed) |
 
 Real-data builds (OSM + LiDAR): [tools/mapgen/README.md](tools/mapgen/README.md).
 

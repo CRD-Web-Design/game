@@ -11,8 +11,8 @@ mapgen build --config tools/mapgen/atherton.toml --fixture
 ```
 
 Output lands in `assets/generated/` (gitignored). Then open the project in Godot 4.5+ and press play —
-`src/main/main.gd` loads the manifest and drops a fly camera over the town centre chunk.
-RMB-drag to look, WASD + E/Q to fly, Shift for speed.
+you spawn on foot in the densest chunk while `src/world/world_streamer.gd` streams the surrounding town
+in and out around you. Controls are on the in-game HUD (WASD/Shift/Space; F for noclip fly).
 
 The fixture (`fixtures/market_street.geojson`) is a **synthetic approximation** of the Market Street area —
 a handful of roads and buildings at plausible positions inside the real map bounds. It exists so the
