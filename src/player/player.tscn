@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/player/player.gd" id="1_player"]
+[ext_resource type="Script" path="res://src/weapons/weapon_manager.gd" id="2_weapons"]
 
 [sub_resource type="CapsuleShape3D" id="Capsule"]
 radius = 0.35
@@ -16,6 +17,9 @@ shape = SubResource("Capsule")
 [node name="Head" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 far = 4000.0
+
+[node name="Weapons" type="Node3D" parent="Head"]
+script = ExtResource("2_weapons")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

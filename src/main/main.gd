@@ -26,6 +26,11 @@ func _ready() -> void:
 	player.position = spawn
 	add_child(player)
 
+	var npc_manager := NPCManager.new()
+	npc_manager.name = "NPCManager"
+	add_child(npc_manager)
+	npc_manager.setup(player, streamer)
+
 	var chunks: Array = manifest.get("chunks", [])
 	print("Atherton: spawned at %s — %d/%d chunks in, streaming the rest (%s)" % [
 		str(spawn), streamer.loaded_count(), chunks.size(),

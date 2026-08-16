@@ -93,11 +93,13 @@ class TestPbfIngest:
         assert area2 > 0
 
     def test_building_feeds_mesher(self, pbf, frame):
-        """The ingested building extrudes without errors — full path check."""
-        from mapgen.buildings import extrude
+        """The ingested pub extrudes with a doorway — full path check."""
+        from mapgen.buildings import extrude_parts, is_enterable
 
         feats = load_osm_pbf(pbf, frame)
-        v, t = extrude(feats.buildings[0], lambda x, y: 42.0)
-        assert v and t
-        top = max(z for _, _, z in v)
+        b = feats.buildings[0]
+        assert is_enterable(b)  # 10 m x 8 m pub
+        parts = extrude_parts(b, lambda x, y: 42.0)
+        assert parts["walls"][1] and parts["roof"][1] and parts["floor"][1]
+        top = max(z for _, _, z in parts["roof"][0])
         assert abs(top - (42.0 + 6.0)) < 1e-6  # 2 levels * 3 m

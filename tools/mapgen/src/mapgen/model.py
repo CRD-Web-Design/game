@@ -55,6 +55,17 @@ TYPOLOGY_HEIGHT: dict[str, float] = {
 METRES_PER_LEVEL = 3.0
 
 
+def poi_kind(tags: dict[str, str]) -> str | None:
+    """Point-of-interest kind for signage/interiors: "pub", "shop" or None."""
+    if tags.get("amenity") == "pub" or tags.get("building") == "pub":
+        return "pub"
+    if tags.get("building") in ("retail", "commercial", "shop", "supermarket"):
+        return "shop"
+    if "shop" in tags:
+        return "shop"
+    return None
+
+
 def classify(tags: dict[str, str]) -> str:
     """Footprint typology from OSM-style tags (coarse M0 version).
 

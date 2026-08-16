@@ -86,3 +86,23 @@ func _unload_one_far(pos: Vector3) -> void:
 
 func loaded_count() -> int:
 	return _loaded.size()
+
+
+## Road points (in Godot coords) from LOADED chunks within a ring around pos.
+## Used for NPC spawning and wander targets, so pedestrians stick to streets.
+func spawn_points_near(pos: Vector3, r_min: float, r_max: float, max_n: int) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for id in _loaded:
+		var chunk: Dictionary = _chunks_by_id[id]
+		var pts: Array = chunk.get("road_points", [])
+		for p in pts:
+			var arr: Array = p
+			if arr.size() != 3:
+				continue
+			var v := Vector3(float(arr[0]), float(arr[2]) + 0.4, -float(arr[1]))
+			var d := Vector2(v.x - pos.x, v.z - pos.z).length()
+			if d >= r_min and d <= r_max:
+				out.append(v)
+				if out.size() >= max_n:
+					return out
+	return out

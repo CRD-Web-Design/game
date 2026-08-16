@@ -57,6 +57,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		head.rotation = Vector3(_pitch, 0.0, 0.0)
 
 
+## Weapon recoil kicks the view up through the same pitch state as the mouse.
+func add_recoil(amount: float) -> void:
+	_pitch = clampf(_pitch + amount, -PI / 2, PI / 2)
+	head.rotation = Vector3(_pitch, 0.0, 0.0)
+
+
 func _physics_process(delta: float) -> void:
 	var input2 := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 

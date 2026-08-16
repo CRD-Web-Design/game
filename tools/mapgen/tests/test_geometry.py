@@ -2,8 +2,14 @@
 
 import math
 
-from mapgen.buildings import EMBED, extrude
-from mapgen.model import Building, Road, building_height, classify
+from mapgen.buildings import (
+    DOOR_HEIGHT,
+    DOOR_WIDTH,
+    EMBED,
+    extrude_parts,
+    is_enterable,
+)
+from mapgen.model import Building, Road, building_height, classify, poi_kind
 from mapgen.roads import DRAPE_OFFSET, ribbon
 from mapgen.terrain import chunk_terrain_mesh
 
@@ -50,38 +56,34 @@ class TestExtrude:
     def _square(self, tags=None):
         return Building("t1", tags or {}, [[(0, 0), (10, 0), (10, 10), (0, 10)]])
 
-    def test_counts(self):
-        v, t = extrude(self._square(), FLAT)
-        # walls: 4 edges * 4 verts, roof: 4 verts; tris: 8 wall + 2 roof
-        assert len(v) == 20 and len(t) == 10
+    def test_sealed_counts(self):
+        parts = extrude_parts(self._square(), FLAT)
+        wv, wt = parts["walls"]
+        rv, rt = parts["roof"]
+        assert "floor" not in parts
+        assert len(wv) == 16 and len(wt) == 8  # 4 solid wall quads
+        assert len(rv) == 4 and len(rt) == 2
 
     def test_heights(self):
         b = self._square({"building:levels": "2"})
-        v, _ = extrude(b, FLAT)
-        zs = sorted({z for _, _, z in v})
+        parts = extrude_parts(b, FLAT)
+        zs = sorted({z for _, _, z in parts["walls"][0]})
         assert zs[0] == 50.0 - EMBED
-        assert abs(zs[-1] - (50.0 + 6.0)) < 1e-9  # 2 levels * 3 m
+        assert abs(parts["roof"][0][0][2] - (50.0 + 6.0)) < 1e-9  # 2 levels * 3 m
 
-    def test_roof_faces_up(self):
-        v, t = extrude(self._square(), FLAT)
-        top = max(z for _, _, z in v)
-        roof = [tri for tri in t if all(abs(v[i][2] - top) < 1e-9 for i in tri)]
-        assert roof and all(_tri_normal_z(v, tri) > 0 for tri in roof)
-
-    def test_roof_area_matches_footprint(self):
-        v, t = extrude(self._square(), FLAT)
-        top = max(z for _, _, z in v)
+    def test_roof_faces_up_and_matches_area(self):
+        parts = extrude_parts(self._square(), FLAT)
+        rv, rt = parts["roof"]
         area = 0.0
-        for tri in t:
-            if all(abs(v[i][2] - top) < 1e-9 for i in tri):
-                area += abs(_tri_normal_z(v, tri)) / 2
+        for tri in rt:
+            assert _tri_normal_z(rv, tri) > 0
+            area += abs(_tri_normal_z(rv, tri)) / 2
         assert abs(area - 100.0) < 1e-6
 
     def test_slope_roof_clears_terrain(self):
         slope = lambda x, y: 50.0 + x  # noqa: E731
-        v, _ = extrude(self._square(), slope)
-        top = max(z for _, _, z in v)
-        assert top >= 60.0  # highest ground (x=10 -> 60) + height > 60
+        parts = extrude_parts(self._square(), slope)
+        assert parts["roof"][0][0][2] >= 60.0  # highest ground + height
 
     def test_hole_ring(self):
         b = Building(
@@ -89,11 +91,64 @@ class TestExtrude:
             [[(0, 0), (20, 0), (20, 20), (0, 20)],
              [(8, 8), (8, 12), (12, 12), (12, 8)]],  # CW hole
         )
-        v, t = extrude(b, FLAT)
-        top = max(z for _, _, z in v)
-        area = sum(abs(_tri_normal_z(v, tri)) / 2 for tri in t
-                   if all(abs(v[i][2] - top) < 1e-9 for i in tri))
+        rv, rt = extrude_parts(b, FLAT)["roof"]
+        area = sum(abs(_tri_normal_z(rv, tri)) / 2 for tri in rt)
         assert abs(area - (400.0 - 16.0)) < 1e-6
+
+
+class TestEnterable:
+    def _pub(self):
+        return Building(
+            "p1", {"amenity": "pub", "name": "Test Arms"},
+            [[(0, 0), (10, 0), (10, 8), (0, 8)]],
+        )
+
+    def test_classification(self):
+        assert is_enterable(self._pub())
+        assert not is_enterable(Building("h", {"building": "terrace"},
+                                         [[(0, 0), (10, 0), (10, 8), (0, 8)]]))
+        # Too small to be a real pub interior
+        tiny = Building("t", {"amenity": "pub"}, [[(0, 0), (2, 0), (2, 2), (0, 2)]])
+        assert not is_enterable(tiny)
+
+    def test_door_gap_exists(self):
+        parts = extrude_parts(self._pub(), FLAT)
+        wv, wt = parts["walls"]
+        # Door edge is the longest (y=0, length 10): no wall geometry may
+        # cross the door centre (x=5) below lintel height on that edge.
+        door_zone = [
+            (v0, v1, v2) for (v0, v1, v2) in
+            ((wv[a], wv[b], wv[c]) for a, b, c in wt)
+            if all(abs(v[1]) < 1e-6 for v in (v0, v1, v2))       # on y=0 edge
+            and min(v[0] for v in (v0, v1, v2)) < 5.0 < max(v[0] for v in (v0, v1, v2))
+        ]
+        floor_z = 50.0 + 0.05
+        for tri in door_zone:
+            # Anything spanning the doorway must be lintel (above door height)
+            assert min(v[2] for v in tri) >= floor_z + DOOR_HEIGHT - 1e-6
+
+    def test_door_width_and_jambs(self):
+        parts = extrude_parts(self._pub(), FLAT)
+        wv, _ = parts["walls"]
+        edge_x = sorted({round(v[0], 4) for v in wv if abs(v[1]) < 1e-6})
+        # Jamb inner faces at 5 +/- DOOR_WIDTH/2
+        assert round(5.0 - DOOR_WIDTH / 2, 4) in edge_x
+        assert round(5.0 + DOOR_WIDTH / 2, 4) in edge_x
+
+    def test_floor_present_and_walkable_height(self):
+        parts = extrude_parts(self._pub(), FLAT)
+        fv, ft = parts["floor"]
+        assert ft, "enterable building must have a floor"
+        assert all(abs(z - 50.05) < 1e-6 for _, _, z in fv)
+        assert all(_tri_normal_z(fv, tri) > 0 for tri in ft)  # faces up
+        area = sum(abs(_tri_normal_z(fv, tri)) / 2 for tri in ft)
+        assert abs(area - 80.0) < 1e-6
+
+    def test_poi_kind(self):
+        assert poi_kind({"amenity": "pub"}) == "pub"
+        assert poi_kind({"building": "retail"}) == "shop"
+        assert poi_kind({"shop": "bakery", "building": "yes"}) == "shop"
+        assert poi_kind({"building": "terrace"}) is None
 
 
 class TestTerrain:

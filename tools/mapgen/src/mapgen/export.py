@@ -9,11 +9,14 @@ from pathlib import Path
 from . import __version__
 from .config import Config
 from .crs import LocalFrame
-from .buildings import extrude
+from .buildings import door_position, extrude_parts, is_enterable
 from .meshio import aabb, write_obj
-from .model import Features
+from .model import Features, poi_kind
 from .roads import ribbon, road_width
 from .terrain import HeightFn, chunk_terrain_mesh
+
+ROAD_POINT_SPACING = 12.0  # metres between NPC wander points along roads
+MAX_ROAD_POINTS_PER_CHUNK = 400
 
 
 def _chunk_of(x: float, y: float, cs: float) -> tuple[int, int]:
@@ -72,6 +75,7 @@ def build_town(
         all_verts += tv
 
         segs = road_segs.get((i, j), [])
+        road_points: list[list[float]] = []
         if segs:
             rv: list = []
             rt: list = []
@@ -91,19 +95,57 @@ def build_town(
             write_obj(out_dir / f"{cid}_roads.obj", rv, rt, f"{cid}_roads")
             layers["roads"] = f"{cid}_roads.obj"
             all_verts += rv
+            # NPC wander points along the carriageway (pipeline coords + height).
+            for _road, _w, p0, p1 in segs:
+                if len(road_points) >= MAX_ROAD_POINTS_PER_CHUNK:
+                    break
+                length = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+                steps = max(1, int(length // ROAD_POINT_SPACING))
+                for s in range(steps + 1):
+                    t = s / steps
+                    x = p0[0] + (p1[0] - p0[0]) * t
+                    y = p0[1] + (p1[1] - p0[1]) * t
+                    road_points.append(
+                        [round(x, 2), round(y, 2), round(height_fn(x, y), 2)]
+                    )
 
         blds = bld_in_chunk.get((i, j), [])
+        pois: list[dict] = []
         if blds:
-            bv: list = []
-            bt: list = []
+            merged: dict[str, tuple[list, list]] = {
+                "walls": ([], []), "roof": ([], []), "floor": ([], []),
+            }
             for b in blds:
-                v, t = extrude(b, height_fn)
-                base = len(bv)
-                bv += v
-                bt += [(a + base, b2 + base, c + base) for a, b2, c in t]
-            write_obj(out_dir / f"{cid}_buildings.obj", bv, bt, f"{cid}_buildings")
-            layers["buildings"] = f"{cid}_buildings.obj"
-            all_verts += bv
+                for part, (v, t) in extrude_parts(b, height_fn).items():
+                    mv, mt = merged[part]
+                    base = len(mv)
+                    mv += v
+                    mt += [(a + base, b2 + base, c + base) for a, b2, c in t]
+
+                kind = poi_kind(b.tags)
+                if kind is not None:
+                    ring = b.rings[0]
+                    cx = sum(p[0] for p in ring) / len(ring)
+                    cy2 = sum(p[1] for p in ring) / len(ring)
+                    door = door_position(b)
+                    pois.append({
+                        "name": b.tags.get("name", ""),
+                        "kind": kind,
+                        "enterable": is_enterable(b),
+                        "x": round(cx, 2), "y": round(cy2, 2),
+                        "ground": round(height_fn(cx, cy2), 2),
+                        "door": [round(door[0], 2), round(door[1], 2)] if door else None,
+                    })
+
+            part_to_layer = {"walls": "walls", "roof": "roofs", "floor": "floors"}
+            for part, layer_name in part_to_layer.items():
+                mv, mt = merged[part]
+                if not mt:
+                    continue
+                fname = f"{cid}_{layer_name}.obj"
+                write_obj(out_dir / fname, mv, mt, f"{cid}_{layer_name}")
+                layers[layer_name] = fname
+                all_verts += mv
 
         chunks.append({
             "id": cid, "i": i, "j": j,
@@ -112,6 +154,9 @@ def build_town(
             # For runtime heuristics (spawn point = densest chunk, etc.)
             "n_buildings": len(blds),
             "n_road_segments": len(segs),
+            # NPC wander targets and signage/interior dressing.
+            "road_points": road_points,
+            "pois": pois,
         })
 
     manifest = {

@@ -77,14 +77,36 @@ class TestEndToEnd:
                 for f in faces:
                     assert len(f) == 3
                     assert all(1 <= i <= len(verts) for i in f)
-        assert seen_layers == {"terrain", "roads", "buildings"}
+        assert seen_layers == {"terrain", "roads", "walls", "roofs", "floors"}
 
     def test_town_centre_chunk_is_populated(self, out):
         """The fixture town centre (~2165 E, 1560 N) lands in chunk c_8_6."""
         m = json.loads((out / "manifest.json").read_text())
         centre = next((c for c in m["chunks"] if c["id"] == "c_8_6"), None)
         assert centre is not None
-        assert "buildings" in centre["layers"]
+        assert "walls" in centre["layers"] and "roofs" in centre["layers"]
+
+    def test_pubs_have_pois_and_floors(self, out):
+        m = json.loads((out / "manifest.json").read_text())
+        pois = [p for c in m["chunks"] for p in c.get("pois", [])]
+        pubs = [p for p in pois if p["kind"] == "pub"]
+        names = {p["name"] for p in pubs}
+        assert {"Jolly Nailor", "Wheatsheaf"} <= names
+        for p in pubs:
+            assert p["enterable"] is True
+            assert p["door"] is not None
+        # Chunks holding enterable POIs must ship a floors layer
+        for c in m["chunks"]:
+            if any(p["enterable"] for p in c.get("pois", [])):
+                assert "floors" in c["layers"], c["id"]
+
+    def test_road_points_on_roads(self, out):
+        m = json.loads((out / "manifest.json").read_text())
+        pts = [p for c in m["chunks"] for p in c.get("road_points", [])]
+        assert len(pts) > 50
+        for x, y, z in pts[:10]:
+            assert 0 <= x <= m["extent_x"] and 0 <= y <= m["extent_y"]
+            assert 20.0 < z < 120.0
 
     def test_terrain_gradient_present(self, out):
         """Fixture terrain rises south->north (30->76 m, PRD 02)."""

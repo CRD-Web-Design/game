@@ -43,10 +43,11 @@ The three reference dossiers are the load-bearing ones for anyone building the m
 
 ## Status
 
-**M1 in progress — first-person walking.** The pipeline builds real OSM data end-to-end (28 tests green);
-the Godot side streams chunks around a walking player with collision. **The landmark and street registers
-were compiled from public web sources and need review by someone who knows the town** — see the accuracy
-caveats at the top of each register.
+**Vertical slice.** Textured world (procedural brick/slate/tarmac/grass), four weapons with hitscan
+firing and reload, ambient NPCs that wander the streets and panic at gunfire, and enterable pubs/shops
+with real doorways, floors, signage and grey-box furniture. 34 pipeline tests green. **The landmark and
+street registers were compiled from public web sources and need review by someone who knows the town** —
+see the accuracy caveats at the top of each register.
 
 ## Run it
 
@@ -61,11 +62,15 @@ You spawn on foot in the densest chunk (with real data: the town centre).
 | Input | Action |
 |---|---|
 | Click | capture the mouse (Esc releases it) |
-| Mouse | look |
+| Mouse | look · **left button fires** |
 | WASD | walk |
 | Shift | sprint |
 | Space | jump |
+| 1–4 / mouse wheel | select weapon (fists, pistol, shotgun, SMG) |
+| R | reload |
 | F | toggle noclip fly (E/Q for up/down, Shift for speed) |
+
+Pubs and shops from the map data have doorways you can walk through — look for the glowing signs.
 
 Real-data builds (OSM + LiDAR): [tools/mapgen/README.md](tools/mapgen/README.md).
 
