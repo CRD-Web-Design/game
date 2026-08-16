@@ -64,9 +64,12 @@ def load_geojson(path: str | Path, frame: LocalFrame) -> Features:
     return feats
 
 
-def load_osm_pbf(path: str | Path, frame: LocalFrame) -> Features:
-    """Load a clipped .osm.pbf extract (Geofabrik Greater Manchester,
-    clipped to the Atherton bounds with `osmium extract`).
+def load_osm_pbf(path: str | Path, frame: LocalFrame, margin: float = 60.0) -> Features:
+    """Load an .osm.pbf extract and clip it to the map bounds.
+
+    Works directly on the whole Geofabrik Greater Manchester extract — no
+    `osmium extract` pre-clip needed. Features with no point inside the
+    local frame (+ margin metres) are dropped at ingest.
 
     Requires `pip install -e tools/mapgen[real]`. See
     docs/reference/data-sources-and-licences.md for where to get the data.
@@ -79,33 +82,54 @@ def load_osm_pbf(path: str | Path, frame: LocalFrame) -> Features:
             "  pip install -e tools/mapgen[real]"
         ) from exc
 
+    hi_x, hi_y = frame.extent_x + margin, frame.extent_y + margin
+
+    def in_frame(pts: list[tuple[float, float]]) -> bool:
+        return any(-margin <= x <= hi_x and -margin <= y <= hi_y for x, y in pts)
+
+    def ring_pts(ring) -> list[tuple[float, float]]:
+        pts = [frame.to_local(n.lon, n.lat) for n in ring]
+        if pts and pts[0] == pts[-1]:
+            pts = pts[:-1]  # unclose
+        return pts
+
     roads: list[Road] = []
     buildings: list[Building] = []
 
-    class Handler(osmium.SimpleHandler):  # pragma: no cover - needs real data
+    class Handler(osmium.SimpleHandler):
+        # Roads come from ways; buildings come from the area callback, which
+        # assembles BOTH closed building ways and multipolygon relations
+        # (courtyards/holes included), so nothing is double-counted.
         def way(self, w):
             tags = {t.k: t.v for t in w.tags}
+            if "highway" not in tags:
+                return
             try:
                 pts = [frame.to_local(n.lon, n.lat) for n in w.nodes]
             except osmium.InvalidLocationError:
                 return
-            if "highway" in tags and len(pts) >= 2:
+            if len(pts) >= 2 and in_frame(pts):
                 roads.append(Road(str(w.id), tags.get("name", ""), tags["highway"], pts))
-            elif "building" in tags and len(pts) >= 4 and pts[0] == pts[-1]:
-                buildings.append(Building(str(w.id), tags, [_orient(pts[:-1], True)]))
 
-        # Multipolygon buildings (holes/courtyards) via area callback.
         def area(self, a):
             tags = {t.k: t.v for t in a.tags}
-            if "building" not in tags or not a.from_way():
-                pass  # ways already handled above; relations handled here
-            if "building" not in tags or a.from_way():
+            if "building" not in tags:
                 return
-            for outer in a.outer_rings():
-                rings = [_orient([frame.to_local(n.lon, n.lat) for n in outer][:-1], True)]
-                for inner in a.inner_rings(outer):
-                    rings.append(_orient([frame.to_local(n.lon, n.lat) for n in inner][:-1], False))
-                buildings.append(Building(f"r{a.orig_id()}", tags, rings))
+            prefix = "w" if a.from_way() else "r"
+            try:
+                for n_outer, outer in enumerate(a.outer_rings()):
+                    rings = [_orient(ring_pts(outer), ccw=True)]
+                    if len(rings[0]) < 3 or not in_frame(rings[0]):
+                        continue
+                    for inner in a.inner_rings(outer):
+                        hole = _orient(ring_pts(inner), ccw=False)
+                        if len(hole) >= 3:
+                            rings.append(hole)
+                    buildings.append(
+                        Building(f"{prefix}{a.orig_id()}_{n_outer}", tags, rings)
+                    )
+            except osmium.InvalidLocationError:
+                return
 
     Handler().apply_file(str(path), locations=True)
     roads.sort(key=lambda r: r.osm_id)

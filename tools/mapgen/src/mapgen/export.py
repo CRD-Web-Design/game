@@ -39,6 +39,9 @@ def build_town(
     """
     cs = cfg.chunk_size
     out_dir.mkdir(parents=True, exist_ok=True)
+    # Keep Godot's importer away from generated OBJs: the game reads them at
+    # runtime via ObjLoader, and editor-importing hundreds of meshes is slow.
+    (out_dir / ".gdignore").write_text("", encoding="utf-8")
 
     road_segs: dict[tuple[int, int], list] = {}
     for road in feats.roads:

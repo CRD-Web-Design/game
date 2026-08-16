@@ -16,8 +16,12 @@ func _ready() -> void:
 		return
 
 	var chunks: Array = manifest.get("chunks", [])
+	var loaded := 0
 	for chunk in chunks:
 		add_child(ChunkLoader.build_chunk(chunk))
+		loaded += 1
+		if loaded % 25 == 0:
+			print("  loading chunks... %d / %d" % [loaded, chunks.size()])
 	print("Atherton grey-box: %d chunks loaded (%s)" % [chunks.size(), manifest.get("generator", "?")])
 
 	_frame_camera(chunks)

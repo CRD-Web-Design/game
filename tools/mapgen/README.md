@@ -20,17 +20,25 @@ pipeline and the Godot loader are testable end-to-end without any data downloads
 
 ## Real data (on the dev Mac)
 
+Two commands — the pipeline clips to the Atherton bounds itself, so no `osmium-tool`/Homebrew needed:
+
 ```sh
-pip install -e "tools/mapgen[real,dev]"
-
-# 1. OSM: download Greater Manchester from Geofabrik, clip to the Atherton bounds
-osmium extract -b -2.5250,53.5100,-2.4700,53.5400 greater-manchester-latest.osm.pbf -o atherton.osm.pbf
-
-# 2. LiDAR (optional at M0): EA Composite DTM 1m tiles for the bounds,
-#    then set [terrain] source="geotiff" and geotiff_glob in atherton.toml
-
-mapgen build --config tools/mapgen/atherton.toml --pbf atherton.osm.pbf --terrain-all
+pip3 install -e "tools/mapgen[real,dev]"
+curl -L -o greater-manchester.osm.pbf \
+  https://download.geofabrik.de/europe/united-kingdom/england/greater-manchester-latest.osm.pbf
+mapgen build --config tools/mapgen/atherton.toml --pbf greater-manchester.osm.pbf
 ```
+
+The download is ~100 MB; the build chews through all of Greater Manchester and keeps only what falls
+inside the bounds (expect a couple of minutes). First Play after a real build also takes longer while
+several hundred chunks parse — watch the Output panel for `loading chunks... N / M`.
+
+Notes:
+- **Terrain is still the synthetic gradient** until EA LiDAR is wired in (M1): real streets and buildings
+  on a plausible-but-fake slope. For real terrain, download EA Composite DTM 1 m tiles and set
+  `[terrain] source="geotiff"` + `geotiff_glob` in `atherton.toml`.
+- If you want a smaller file to re-run against, `osmium extract` (from `brew install osmium-tool`) can
+  pre-clip the extract — purely an optimisation, never required.
 
 Sources, formats and coordinate systems: [docs/reference/data-sources-and-licences.md](../../docs/reference/data-sources-and-licences.md).
 
@@ -41,7 +49,8 @@ python -m pytest tools/mapgen/tests -q
 ```
 
 Covers ribbon geometry, extrusion (incl. holes and slopes), terrain seams between chunks, typology
-classification, and an end-to-end fixture build with a byte-identical determinism check.
+classification, an end-to-end fixture build with a byte-identical determinism check, and the real-data
+`.pbf` ingest path against a synthetic PBF (auto-skipped unless the `[real]` extra is installed).
 
 ## Design notes
 
