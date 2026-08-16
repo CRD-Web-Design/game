@@ -1,0 +1,554 @@
+{
+ "type": "FeatureCollection",
+ "name": "SYNTHETIC test fixture - Market Street area, Atherton. NOT real survey data. Approximate layout for pipeline testing only; real builds use OSM (--pbf).",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "w_market_street",
+    "name": "Market Street",
+    "highway": "primary"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -2.4957153,
+      53.5228067
+     ],
+     [
+      -2.4949161,
+      53.5231451
+     ],
+     [
+      -2.494117,
+      53.5234835
+     ],
+     [
+      -2.4933178,
+      53.5238219
+     ],
+     [
+      -2.4925186,
+      53.5241603
+     ],
+     [
+      -2.4917194,
+      53.5244987
+     ],
+     [
+      -2.4909201,
+      53.5248371
+     ],
+     [
+      -2.4901209,
+      53.5251755
+     ],
+     [
+      -2.4893216,
+      53.5255139
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "w_bolton_road",
+    "name": "Bolton Road",
+    "highway": "primary"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -2.491884,
+      53.5214664
+     ],
+     [
+      -2.4921269,
+      53.5229035
+     ],
+     [
+      -2.4923677,
+      53.5241609
+     ],
+     [
+      -2.4926107,
+      53.5255981
+     ],
+     [
+      -2.4927782,
+      53.5270356
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "w_mealhouse_lane",
+    "name": "Mealhouse Lane",
+    "highway": "secondary"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -2.4949776,
+      53.523119
+     ],
+     [
+      -2.496436,
+      53.5237846
+     ],
+     [
+      -2.4976368,
+      53.5232852
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "w_warburton_place",
+    "name": "Warburton Place",
+    "highway": "service"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -2.4915168,
+      53.5247168
+     ],
+     [
+      -2.4920057,
+      53.5252044
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_jolly_nailor",
+    "name": "Jolly Nailor",
+    "building": "pub",
+    "amenity": "pub",
+    "building:levels": "2"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4945407,
+       53.5234199
+      ],
+      [
+       -2.4943685,
+       53.5234927
+      ],
+      [
+       -2.4944647,
+       53.5235733
+      ],
+      [
+       -2.4946368,
+       53.5235004
+      ],
+      [
+       -2.4945407,
+       53.5234199
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_shop_row_1",
+    "building": "retail"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4941639,
+       53.5235849
+      ],
+      [
+       -2.4940164,
+       53.5236474
+      ],
+      [
+       -2.4941037,
+       53.5237207
+      ],
+      [
+       -2.4942513,
+       53.5236582
+      ],
+      [
+       -2.4941639,
+       53.5235849
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_shop_row_2",
+    "building": "retail",
+    "building:levels": "3"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4939795,
+       53.523663
+      ],
+      [
+       -2.4938319,
+       53.5237255
+      ],
+      [
+       -2.4939193,
+       53.5237988
+      ],
+      [
+       -2.4940668,
+       53.5237363
+      ],
+      [
+       -2.4939795,
+       53.523663
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_shop_row_3",
+    "building": "retail"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.493795,
+       53.5237411
+      ],
+      [
+       -2.4936475,
+       53.5238036
+      ],
+      [
+       -2.4937349,
+       53.5238769
+      ],
+      [
+       -2.4938824,
+       53.5238144
+      ],
+      [
+       -2.493795,
+       53.5237411
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_wheatsheaf",
+    "name": "Wheatsheaf",
+    "building": "pub",
+    "amenity": "pub",
+    "building:levels": "3"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4929165,
+       53.5237492
+      ],
+      [
+       -2.4927198,
+       53.5238325
+      ],
+      [
+       -2.4928247,
+       53.5239204
+      ],
+      [
+       -2.4930214,
+       53.5238371
+      ],
+      [
+       -2.4929165,
+       53.5237492
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_terrace_1",
+    "building": "terrace"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4909324,
+       53.5246224
+      ],
+      [
+       -2.4908218,
+       53.5246693
+      ],
+      [
+       -2.4908917,
+       53.5247279
+      ],
+      [
+       -2.4910023,
+       53.524681
+      ],
+      [
+       -2.4909324,
+       53.5246224
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_terrace_2",
+    "building": "terrace"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4908095,
+       53.5246745
+      ],
+      [
+       -2.4906988,
+       53.5247213
+      ],
+      [
+       -2.4907687,
+       53.5247799
+      ],
+      [
+       -2.4908794,
+       53.5247331
+      ],
+      [
+       -2.4908095,
+       53.5246745
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_terrace_3",
+    "building": "terrace"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4906865,
+       53.5247265
+      ],
+      [
+       -2.4905758,
+       53.5247734
+      ],
+      [
+       -2.4906457,
+       53.524832
+      ],
+      [
+       -2.4907564,
+       53.5247852
+      ],
+      [
+       -2.4906865,
+       53.5247265
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_terrace_4",
+    "building": "terrace"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4905635,
+       53.5247786
+      ],
+      [
+       -2.4904529,
+       53.5248255
+      ],
+      [
+       -2.4905228,
+       53.5248841
+      ],
+      [
+       -2.4906334,
+       53.5248372
+      ],
+      [
+       -2.4905635,
+       53.5247786
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_town_hall",
+    "name": "Town Hall",
+    "building": "civic",
+    "amenity": "townhall",
+    "building:levels": "3"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4918199,
+       53.5224464
+      ],
+      [
+       -2.4913675,
+       53.5224483
+      ],
+      [
+       -2.4913698,
+       53.522646
+      ],
+      [
+       -2.4918222,
+       53.5226441
+      ],
+      [
+       -2.4918199,
+       53.5224464
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_church",
+    "name": "Parish Church",
+    "building": "church"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4938334,
+       53.5257881
+      ],
+      [
+       -2.4935663,
+       53.5258173
+      ],
+      [
+       -2.4936589,
+       53.5261178
+      ],
+      [
+       -2.4939259,
+       53.5260886
+      ],
+      [
+       -2.4938334,
+       53.5257881
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "@id": "b_supermarket",
+    "name": "Supermarket",
+    "building": "retail"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -2.4900071,
+       53.5246777
+      ],
+      [
+       -2.4892693,
+       53.52499
+      ],
+      [
+       -2.4896188,
+       53.5252831
+      ],
+      [
+       -2.4903566,
+       53.5249708
+      ],
+      [
+       -2.4900071,
+       53.5246777
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+[project]
+name = "mapgen"
+version = "0.1.0"
+description = "Atherton map pipeline: OSM + LiDAR + OS Open Data -> engine-ready chunks (ADR-0002)"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "pyproj>=3.6",
+    "mapbox_earcut>=1.0",
+]
+
+[project.optional-dependencies]
+# Real-data ingest, only needed when building from actual survey data on the dev Mac.
+real = [
+    "osmium>=3.7",     # .osm.pbf ingest
+    "rasterio>=1.3",   # EA LiDAR GeoTIFF terrain
+]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+mapgen = "mapgen.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

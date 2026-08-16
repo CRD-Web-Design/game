@@ -16,7 +16,9 @@ export_presets.cfg
 # See docs/adr/0002-map-data-pipeline.md
 /tools/mapgen/cache/
 /tools/mapgen/out/
-/assets/generated/
+/assets/generated/*
+!/assets/generated/.gitkeep
+*.egg-info/
 *.osm.pbf
 *.tif
 *.laz

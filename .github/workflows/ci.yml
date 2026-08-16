@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  mapgen:
+    name: mapgen tests + fixture build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install -e "tools/mapgen[dev]"
+      - name: Unit + e2e tests
+        run: python -m pytest tools/mapgen/tests -q
+      - name: Fixture build (smoke)
+        run: |
+          mapgen build --config tools/mapgen/atherton.toml --fixture --out /tmp/generated
+          test -f /tmp/generated/manifest.json
+      - name: PRD link check
+        run: |
+          python - <<'EOF'
+          import os, re, sys
+          errors = []
+          for dirpath, _, files in os.walk("."):
+              if ".git" in dirpath: continue
+              for f in files:
+                  if not f.endswith(".md"): continue
+                  path = os.path.join(dirpath, f)
+                  for m in re.finditer(r"\[[^\]]*\]\(([^)]+)\)", open(path).read()):
+                      t = m.group(1).split("#")[0]
+                      if not t or t.startswith(("http", "mailto:")): continue
+                      if not os.path.exists(os.path.normpath(os.path.join(dirpath, t))):
+                          errors.append(f"{path}: {m.group(1)}")
+          if errors:
+              print("\n".join(errors)); sys.exit(1)
+          print("links ok")
+          EOF

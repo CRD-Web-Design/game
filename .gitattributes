@@ -1,0 +1,18 @@
+# Hand-made binary assets go through Git LFS (PRD 08).
+# assets/generated/ is never committed at all (see .gitignore) — it is
+# reproducible pipeline output.
+assets/handmade/**/*.glb filter=lfs diff=lfs merge=lfs -text
+assets/handmade/**/*.gltf filter=lfs diff=lfs merge=lfs -text
+assets/handmade/**/*.png filter=lfs diff=lfs merge=lfs -text
+assets/handmade/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+assets/handmade/**/*.exr filter=lfs diff=lfs merge=lfs -text
+assets/handmade/**/*.hdr filter=lfs diff=lfs merge=lfs -text
+assets/handmade/**/*.ogg filter=lfs diff=lfs merge=lfs -text
+assets/handmade/**/*.wav filter=lfs diff=lfs merge=lfs -text
+assets/handmade/**/*.blend filter=lfs diff=lfs merge=lfs -text
+
+# Godot text formats stay plain text (the point of ADR-0001).
+*.gd text
+*.tscn text
+*.tres text
+*.godot text

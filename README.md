@@ -3,7 +3,8 @@
 **Working title.** An open-world, first-person sandbox shooter set in a 1:1 geographic recreation of
 Atherton — a town of roughly 22,000 people in the Metropolitan Borough of Wigan, Greater Manchester.
 
-This repository currently contains **design documentation only**. No engine project, no game code.
+This repository contains the design documentation and the **M0 toolchain**: the map-generation pipeline
+(`tools/mapgen`) and a Godot 4.5 project skeleton that loads its output under a fly camera.
 
 ---
 
@@ -42,9 +43,20 @@ The three reference dossiers are the load-bearing ones for anyone building the m
 
 ## Status
 
-Pre-production. The PRD is drafted and awaiting review. **The landmark and street registers were compiled
-from public web sources and need review by someone who knows the town** — see the accuracy caveats at the top
-of each register.
+**M0 in progress.** The PRD is drafted; the pipeline builds the bundled fixture end-to-end (23 tests green)
+and the Godot skeleton loads it. **The landmark and street registers were compiled from public web sources
+and need review by someone who knows the town** — see the accuracy caveats at the top of each register.
+
+## Run it
+
+```sh
+pip install -e "tools/mapgen[dev]"
+mapgen build --config tools/mapgen/atherton.toml --fixture
+# open the repo in Godot 4.5 (macOS, Apple Silicon) and press Play
+# RMB-drag look · WASD fly · E/Q up/down · Shift fast
+```
+
+Real-data builds (OSM + LiDAR): [tools/mapgen/README.md](tools/mapgen/README.md).
 
 ## Content
 

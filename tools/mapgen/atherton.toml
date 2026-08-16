@@ -1,0 +1,22 @@
+# Map build configuration — Atherton, Greater Manchester.
+# Bounds from docs/prd/03-world-and-map.md. WGS84 degrees.
+
+[bounds]
+north = 53.5400
+south = 53.5100
+west = -2.5250
+east = -2.4700
+
+[grid]
+chunk_size = 256.0    # metres, per PRD 03
+terrain_step = 8.0    # terrain grid resolution, metres
+
+[terrain]
+# "fixture"  -> synthetic Atherton-like gradient (30 m SW -> 76 m N, PRD 02/03)
+# "geotiff"  -> EA LiDAR Composite DTM tiles (requires mapgen[real])
+source = "fixture"
+geotiff_glob = ""     # e.g. "data/lidar/*.tif" when source = "geotiff"
+
+[export]
+# Output directory, relative to repo root (see .gitignore: generated assets are not committed).
+out = "assets/generated"
