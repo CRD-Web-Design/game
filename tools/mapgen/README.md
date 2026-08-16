@@ -10,7 +10,7 @@ pip install -e "tools/mapgen[dev]"
 mapgen build --config tools/mapgen/atherton.toml --fixture
 ```
 
-Output lands in `assets/generated/` (gitignored). Then open the project in Godot 4.5 and press play —
+Output lands in `assets/generated/` (gitignored). Then open the project in Godot 4.5+ and press play —
 `src/main/main.gd` loads the manifest and drops a fly camera over the town centre chunk.
 RMB-drag to look, WASD + E/Q to fly, Shift for speed.
 

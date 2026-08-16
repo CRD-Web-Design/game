@@ -6,6 +6,50 @@ on:
   pull_request:
 
 jobs:
+  godot-check:
+    name: Godot scene + script compile check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-4.5-stable-linux
+      - name: Download Godot 4.5 (headless-capable Linux build)
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -fL -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v4.5-stable_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+      - name: Generate fixture map (import step needs assets present)
+        run: |
+          pip install -e "tools/mapgen"
+          mapgen build --config tools/mapgen/atherton.toml --fixture
+      - name: Import project (validates scenes + resources)
+        run: ~/godot/godot --headless --import --path . 2>&1 | tee /tmp/import.log
+      - name: Compile-check every GDScript
+        run: |
+          status=0
+          while IFS= read -r f; do
+            if ! ~/godot/godot --headless --path . --check-only -s "res://${f}" >/tmp/check.log 2>&1; then
+              echo "::error file=${f}::GDScript compile check failed"
+              cat /tmp/check.log
+              status=1
+            fi
+          done < <(git ls-files 'src/**/*.gd' '*.gd')
+          exit $status
+      - name: Fail on import-time script errors
+        run: |
+          if grep -E "SCRIPT ERROR|Failed to load script" /tmp/import.log; then
+            echo "::error::script errors during project import"
+            exit 1
+          fi
+
   mapgen:
     name: mapgen tests + fixture build
     runs-on: ubuntu-latest

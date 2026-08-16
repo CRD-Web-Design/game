@@ -16,13 +16,18 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+	# `as` casts, not `is` checks: GDScript does not narrow types after `is`,
+	# so member access on the InputEvent-typed param is a compile error.
+	var mb := event as InputEventMouseButton
+	if mb != null and mb.button_index == MOUSE_BUTTON_RIGHT:
 		Input.mouse_mode = (
-			Input.MOUSE_MODE_CAPTURED if event.pressed else Input.MOUSE_MODE_VISIBLE
+			Input.MOUSE_MODE_CAPTURED if mb.pressed else Input.MOUSE_MODE_VISIBLE
 		)
-	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		_yaw -= event.relative.x * mouse_sensitivity
-		_pitch = clampf(_pitch - event.relative.y * mouse_sensitivity, -PI / 2, PI / 2)
+		return
+	var mm := event as InputEventMouseMotion
+	if mm != null and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		_yaw -= mm.relative.x * mouse_sensitivity
+		_pitch = clampf(_pitch - mm.relative.y * mouse_sensitivity, -PI / 2, PI / 2)
 		rotation = Vector3(_pitch, _yaw, 0.0)
 
 

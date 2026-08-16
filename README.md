@@ -21,7 +21,7 @@ Chapel and the walk takes as long as it takes.
 | **Setting** | Atherton, Greater Manchester — modern day |
 | **Playable area** | ≈ 12.2 km² |
 | **Platform** | macOS, Apple Silicon (M1 and later) |
-| **Engine** | Godot 4.5, Forward+ renderer, Metal backend |
+| **Engine** | Godot 4.5+ (tested on 4.7), Forward+ renderer, Metal backend |
 | **Mode** | Single-player |
 | **Target rating** | PEGI 18 / ESRB M |
 
@@ -52,7 +52,7 @@ and need review by someone who knows the town** — see the accuracy caveats at 
 ```sh
 pip install -e "tools/mapgen[dev]"
 mapgen build --config tools/mapgen/atherton.toml --fixture
-# open the repo in Godot 4.5 (macOS, Apple Silicon) and press Play
+# open the repo in Godot 4.5+ (macOS, Apple Silicon) and press Play
 # RMB-drag look · WASD fly · E/Q up/down · Shift fast
 ```
 

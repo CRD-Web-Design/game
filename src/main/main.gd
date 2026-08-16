@@ -39,8 +39,9 @@ func _frame_camera(chunks: Array) -> void:
 		return
 	# Manifest AABB is in pipeline axes (x=east, y=north, z=up);
 	# Godot position is (east, up, -north). See tools/mapgen meshio.py.
-	var cx := (aabb[0] + aabb[3]) / 2.0
-	var cy := (aabb[1] + aabb[4]) / 2.0
+	# Explicit float types: `:=` cannot infer from untyped-Array elements.
+	var cx: float = (aabb[0] + aabb[3]) / 2.0
+	var cy: float = (aabb[1] + aabb[4]) / 2.0
 	var top: float = aabb[5]
 	camera.position = Vector3(cx, top + 120.0, -(cy - 180.0))
 	camera.look_at(Vector3(cx, top, -cy))
